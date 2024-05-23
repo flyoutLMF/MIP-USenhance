@@ -113,6 +113,8 @@ class CycleGANModel(BaseModel):
             self.num_classes = 2 
 
         self.fc = nn.Linear(256*target_feat*target_feat, self.num_classes).to(self.device) # Adjust the input size based on the dimensions of the bottleneck feature
+        self.fcD = nn.Linear(256*target_feat//2*target_feat//2, self.num_classes).to(self.device)  # Adjust the input size based on the dimensions of the bottleneck feature
+
         # By default, freeze all parameters except for the classifier
         for param in self.fc.parameters():
             param.requires_grad = True        
@@ -212,7 +214,25 @@ class CycleGANModel(BaseModel):
         # Combined loss and calculate gradients
         loss_D = (loss_D_real + loss_D_fake) * 0.5
         loss_D.backward()
-        return loss_D
+        # return loss_D
+
+        if self.opt.is_mtl:
+            bottleneck_feature_real = netD(real, [8], encode_only=True)[0]
+            bottleneck_feature_fake = netD(fake.detach(), [8], encode_only=True)[0]
+
+            # Flatten the feature and pass through the classifier
+            feature_real_flat = bottleneck_feature_real.view(bottleneck_feature_real.size(0), -1)
+            pred_real = self.fcD(feature_real_flat)
+
+            feature_fake_flat = bottleneck_feature_fake.view(bottleneck_feature_fake.size(0), -1)
+            pred_fake = self.fcD(feature_fake_flat)
+
+            loss_cls_real = self.criterionCls(pred_real, self.label)
+            loss_cls_fake = self.criterionCls(pred_fake, self.label)
+
+            # Combine the losses
+            loss_cls = loss_cls_real + loss_cls_fake
+            loss_cls.backward()
 
     def backward_D_A(self):
         """Calculate GAN loss for discriminator D_A"""

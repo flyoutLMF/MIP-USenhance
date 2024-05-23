@@ -721,9 +721,20 @@ class NLayerDiscriminator(nn.Module):
         sequence += [nn.Conv2d(ndf * nf_mult, 1, kernel_size=kw, stride=1, padding=padw)]  # output 1 channel prediction map
         self.model = nn.Sequential(*sequence)
 
-    def forward(self, input):
-        """Standard forward."""
-        return self.model(input)
+    def forward(self, input, layers=None, encode_only=False):
+        if len(layers) > 0:
+            feat = input
+            feats = []
+            for layer_id, layer in enumerate(self.model):
+                feat = layer(feat)
+                if layer_id in layers:
+                    feats.append(feat)
+                if layer_id == layers[-1] and encode_only:
+                    return feats  # return intermediate features alone; stop in the last layers
+            return feat, feats  # return both output and intermediate features
+        else:
+            """Standard forward"""
+            return self.model(input)
 
 
 class PixelDiscriminator(nn.Module):
