@@ -33,6 +33,7 @@ from models import create_model
 from util.visualizer import save_images
 from util import html
 from util.ssim_psnr import calculate_psnr, calculate_ssim
+from util.unsupervised_metric import calculate_CR_CNR
 import numpy as np
 
 try:
@@ -54,6 +55,8 @@ if __name__ == '__main__':
     model = create_model(opt)      # create a model given opt.model and other options
     psnr_tot = []
     ssim_tot = []
+    CR_tot = []
+    CNR_tot = []
     for fold in range(5):
         dataset = create_dataset(opt, fold)  # create a dataset given opt.dataset_mode and other options
         model.setup(opt, weights_paths[fold])               # regular setup: load and print networks; create schedulers
@@ -72,7 +75,7 @@ if __name__ == '__main__':
         # test with eval mode. This only affects layers like batchnorm and dropout.
         # For [pix2pix]: we use batchnorm and dropout in the original pix2pix. You can experiment it with and without eval() mode.
         # For [CycleGAN]: It should not affect CycleGAN as CycleGAN uses instancenorm without dropout.
-        psnr, ssim = 0., 0.
+        psnr, ssim, cr, cnr = 0., 0., 0., 0.
         for i, (data, label) in enumerate(dataset):
             model.set_input(data, label)  # unpack data from data loader
             model.test()           # run inference
@@ -98,9 +101,14 @@ if __name__ == '__main__':
             # print(calculate_psnr(fake_B, real_B, 0), calculate_ssim(fake_B, real_B, 0))
             psnr += calculate_psnr(fake_B, real_B, 0)
             ssim += calculate_ssim(fake_B, real_B, 0)
+            tmp_cr, tmp_cnr = calculate_CR_CNR(fake_B)
+            cr += tmp_cr
+            cnr += tmp_cnr
             
         psnr_tot.append(psnr / len(dataset))
         ssim_tot.append(ssim / len(dataset))
+        CR_tot.append(cr / len(dataset))
+        CNR_tot.append(cnr / len(dataset))
         webpage.save()  # save the HTML
 
     print(psnr_tot)
@@ -109,3 +117,7 @@ if __name__ == '__main__':
     print('PSNR std: ', np.std(np.array(psnr_tot)))
     print('SSIM mean: ', np.mean(np.array(ssim_tot)))
     print('SSIM std: ', np.std(np.array(ssim_tot)))
+    print('CR mean: ', np.mean(np.array(CR_tot)))
+    print('CR std: ', np.std(np.array(CR_tot)))
+    print('CNR mean: ', np.mean(np.array(CNR_tot)))
+    print('CNR std: ', np.std(np.array(CNR_tot)))

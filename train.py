@@ -25,6 +25,7 @@ from data import create_dataset
 from models import create_model
 from util.visualizer import Visualizer
 from util.ssim_psnr import calculate_psnr, calculate_ssim
+from util.unsupervised_metric import calculate_CR_CNR
 from copy import deepcopy
 import numpy as np
 
@@ -44,7 +45,7 @@ if __name__ == '__main__':
 
         model = create_model(opt)      # create a model given opt.model and other options
         model.train()
-        model.setup(opt)               # regular setup: load and print networks; create schedulers
+        model.setup_train(opt)               # regular setup: load and print networks; create schedulers
         visualizer = Visualizer(opt)   # create a visualizer that display/save images and plots
         total_iters = 0                # the total number of training iterations
 
@@ -93,7 +94,7 @@ if __name__ == '__main__':
 
             if epoch % opt.val_epoch_freq == 0:
                 model.eval()
-                psnr, ssim = 0., 0.
+                psnr, ssim, cr, cnr = 0., 0., 0., 0.
                 for i, (data, label) in enumerate(val_dataset):
                     model.set_input(data, label)
                     fake_B, real_B = model.validate()
@@ -105,9 +106,15 @@ if __name__ == '__main__':
                     real_B = (real_B * 255.0).round().astype(np.int8)
                     psnr += calculate_psnr(fake_B, real_B, 0)
                     ssim += calculate_ssim(fake_B, real_B, 0)
+                    tmp_cr, tmp_cnr = calculate_CR_CNR(fake_B)
+                    cr += tmp_cr
+                    cnr += tmp_cnr
+
                 model.train()
                 psnr = psnr / val_dataset_size
                 ssim = ssim / val_dataset_size
+                cr = cr / val_dataset_size
+                cnr = cnr / val_dataset_size
                 if psnr > best_psnr:
                     best_psnr = psnr
                     p = os.path.join(opt.checkpoints_dir, opt.name)
@@ -123,7 +130,7 @@ if __name__ == '__main__':
                             os.remove(os.path.join(p, n))
                     model.save_networks(f'Fold{str(fold+1)}_best_ssim_%d_%.3f' % (epoch, ssim))
 
-                print('End of epoch %d / %d \t Time Taken: %d sec. Val: %.3f, %.3f' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time, psnr, ssim))
+                print('End of epoch %d / %d \t Time Taken: %d sec. Val: %.3f, %.3f, %.3f, %.3f' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time, psnr, ssim))
 
             else:
                 print('End of epoch %d / %d \t Time Taken: %d sec.' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))

@@ -83,6 +83,16 @@ class BaseModel(ABC):
         """Calculate losses, gradients, and update network weights; called in every training iteration"""
         pass
 
+    def setup_train(self, opt):
+        """Load and print networks; create schedulers
+
+        Parameters:
+            opt (Option class) -- stores all the experiment flags; needs to be a subclass of BaseOptions
+        """
+        if self.isTrain:
+            self.schedulers = [networks.get_scheduler(optimizer, opt) for optimizer in self.optimizers]
+        self.print_networks(opt.verbose)
+
     def setup(self, opt, weights_path):
         """Load and print networks; create schedulers
 
