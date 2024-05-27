@@ -102,6 +102,8 @@ if __name__ == '__main__':
             psnr += calculate_psnr(fake_B, real_B, 0)
             ssim += calculate_ssim(fake_B, real_B, 0)
             tmp_cr, tmp_cnr = calculate_CR_CNR(fake_B)
+            if tmp_cr < 0.:
+                print(tmp_cr)
             cr += tmp_cr
             cnr += tmp_cnr
             

@@ -98,12 +98,12 @@ if __name__ == '__main__':
                 for i, (data, label) in enumerate(val_dataset):
                     model.set_input(data, label)
                     fake_B, real_B = model.validate()
-                    fake_B = (fake_B + 1.) / 2
+                    fake_B = (fake_B + 1.) / 2  # denorm
                     real_B = (real_B + 1.) / 2
-                    fake_B = fake_B.squeeze(0).squeeze(0).float().detach().cpu().clamp_(0., 1.).numpy()
-                    real_B = real_B.squeeze(0).squeeze(0).float().detach().cpu().clamp_(0., 1.).numpy()
-                    fake_B = (fake_B * 255.0).round().astype(np.int8)
-                    real_B = (real_B * 255.0).round().astype(np.int8)
+                    fake_B = fake_B.squeeze(0).squeeze(0).detach().cpu().numpy()
+                    real_B = real_B.squeeze(0).squeeze(0).detach().cpu().numpy()
+                    fake_B = np.clip((fake_B * 255.0), 0., 255.)
+                    real_B = np.clip((real_B * 255.0), 0., 255.)
                     psnr += calculate_psnr(fake_B, real_B, 0)
                     ssim += calculate_ssim(fake_B, real_B, 0)
                     tmp_cr, tmp_cnr = calculate_CR_CNR(fake_B)
@@ -130,7 +130,7 @@ if __name__ == '__main__':
                             os.remove(os.path.join(p, n))
                     model.save_networks(f'Fold{str(fold+1)}_best_ssim_%d_%.3f' % (epoch, ssim))
 
-                print('End of epoch %d / %d \t Time Taken: %d sec. Val: %.3f, %.3f, %.3f, %.3f' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time, psnr, ssim))
+                print('End of epoch %d / %d \t Time Taken: %d sec. Val: %.3f, %.3f, %.3f, %.3f' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time, psnr, ssim, cr, cnr))
 
             else:
                 print('End of epoch %d / %d \t Time Taken: %d sec.' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))
