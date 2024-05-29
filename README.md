@@ -44,12 +44,10 @@ python train.py \
 
 ## Checkpoint
 
-Checkpoints for abalation have been uploaded to [Google Drive]((https://drive.google.com/drive/folders/1rp1SQ2hO-vNdGJYamuuM4EfD-vSRzkQE?usp=drive_link))
+Checkpoints for abalation have been uploaded to [GoogleDrive](https://drive.google.com/drive/folders/1rCnvnXaw7Mx3Fg1HGvd7hZS9y3u4bPZa?usp=sharing)
 
 ```shell
 Medical Image Processing
 |--cyclegan_base 
-|--cyclegan_G # With Generator classifier for training
-|--cyclegan_D # With Discriminator classifier for training
 |--cyclegan_D+G # With both Generator & Discriminator classifiers for training
 ```
