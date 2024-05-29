@@ -7,5 +7,6 @@ python train.py \
 --output_nc 1 \
 --batch_size 8 \
 --phase train \
---is_mtl # additional classifier loss
-
+--display_id 0 \
+--is_mtl \
+--is_mtl_D

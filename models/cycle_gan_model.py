@@ -214,11 +214,11 @@ class CycleGANModel(BaseModel):
         # Combined loss and calculate gradients
         loss_D = (loss_D_real + loss_D_fake) * 0.5
         loss_D.backward()
-        # return loss_D
-
-        if self.opt.is_mtl:
-            bottleneck_feature_real = netD(real, [8], encode_only=True)[0]
-            bottleneck_feature_fake = netD(fake.detach(), [8], encode_only=True)[0]
+        
+        if self.opt.is_mtl_D:
+            # print("Model is d adding")
+            bottleneck_feature_real = netD(real, [8-1], encode_only=True)[0]    #[24, 512, 31, 31]
+            bottleneck_feature_fake = netD(fake.detach(), [8-1], encode_only=True)[0]      #[24, 512, 31, 31]
 
             # Flatten the feature and pass through the classifier
             feature_real_flat = bottleneck_feature_real.view(bottleneck_feature_real.size(0), -1)
@@ -233,6 +233,8 @@ class CycleGANModel(BaseModel):
             # Combine the losses
             loss_cls = loss_cls_real + loss_cls_fake
             loss_cls.backward()
+            
+        return loss_D
 
     def backward_D_A(self):
         """Calculate GAN loss for discriminator D_A"""

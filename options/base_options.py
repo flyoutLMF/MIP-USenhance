@@ -22,6 +22,7 @@ class BaseOptions():
         # Added parameters
         parser.add_argument('--data_norm', default='basic', help='data normalization method [basic | ab_seperate(added!) | class_separate(added!)]') #Error
         parser.add_argument('--is_mtl', action='store_true', help='MultitaskingLearning')
+        parser.add_argument('--is_mtl_D', action='store_true', help='D_MultitaskingLearning')
         parser.add_argument('--d_norm', default='basic', help='discriminator normalization method [basic | spectral]')
         parser.add_argument('--data_type', default='all', help='data type [all | typeA (Breast, Carotid, Thyroid) | typeB (Kidney, Liver) ]')
         parser.add_argument('--is_skipconnect', action='store_true', help='Add Skipconnections in ResNEt Encoder')
