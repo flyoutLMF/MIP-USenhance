@@ -39,3 +39,17 @@ python train.py \
 --is_mtl_D                  # Use Discriminator classifier
 
 ```
+
+
+
+## Checkpoint
+
+Checkpoints for abalation have been uploaded to [Google Drive]((https://drive.google.com/drive/folders/1rp1SQ2hO-vNdGJYamuuM4EfD-vSRzkQE?usp=drive_link))
+
+```shell
+Medical Image Processing
+|--cyclegan_base 
+|--cyclegan_G # With Generator classifier for training
+|--cyclegan_D # With Discriminator classifier for training
+|--cyclegan_D+G # With both Generator & Discriminator classifiers for training
+```
