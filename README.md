@@ -48,6 +48,5 @@ Checkpoints for abalation have been uploaded to [GoogleDrive](https://drive.goog
 
 ```shell
 Medical Image Processing
-|--cyclegan_base 
 |--cyclegan_D+G # With both Generator & Discriminator classifiers for training
 ```
